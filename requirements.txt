@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+email-validator
+uvicorn
+bcrypt
+python-jose 
+passlib
+
+
+#  create virtual environment = python3 -m venv stock_env
+#  activate virtual environment = stock_env\Scripts\activate
+#  install dependencies = pip install -r requirements.txt
+#  execute streamlit app = uvicorn main:app --reload
