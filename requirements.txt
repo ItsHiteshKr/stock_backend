@@ -8,6 +8,9 @@ uvicorn
 bcrypt
 python-jose 
 passlib
+redis
+pymysql
+python-dotenv
 
 
 #  create virtual environment = python3 -m venv stock_env
