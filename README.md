@@ -1,2 +1,27 @@
 # Stock_Backend
 this is for Stock_Price &amp; because  
+
+
+.env Configuration 
+
+
+DB_USER=root
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+
+Frontend_URL=
+
+DATABASE_URL=mysql+pymysql://<DB_USER><DB_PASSWORD>@<DB_HOST>t:<DB_PORT>/<DB_NAME>
+
+
+JWT_SECRET_KEY = 
+JWT_REFRESH_SECRET_KEY = 
+JWT_ALGORITHM = HS256
+
+ACCESS_TOKEN_EXPIRY_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+
+ADMIN_USERNAME =
+ADMIN_PASSWORD =
