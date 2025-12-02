@@ -10,7 +10,7 @@ import uvicorn
 import traceback
 import logging
 from pydantic import BaseModel, EmailStr
-from db.database import get_db, init_db
+from db.database import get_db
 from model.user_model import UserTable
 from schema.user_schema import UserCreate, UserResponse
 from utils import token_utils as utils
@@ -42,18 +42,10 @@ class PasswordResetConfirm(BaseModel):
     new_password: str
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Initialize database on startup
-    init_db()
-    yield
-
-
 app = FastAPI(
     title="Nifty Stock API",
     description="API for managing Nifty stock data",
-    version="1.0.0",
-    lifespan=lifespan
+    version="1.0.0"
 )
 
 
