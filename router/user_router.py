@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from typing import List
-from db.batabase import get_db
+from db.database import get_db
 from schema.user_schema import UserResponse, UserUpdate
 from service.user_service import UserService
 
