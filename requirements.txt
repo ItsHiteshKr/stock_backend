@@ -1,4 +1,5 @@
 fastapi
+fastapi-mail
 uvicorn
 sqlalchemy
 pydantic

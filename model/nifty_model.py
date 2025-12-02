@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float, Date
-from db.batabase import Base
+from db.database import Base
 
 class NiftyTable(Base):
     __tablename__ = "nifty_data"

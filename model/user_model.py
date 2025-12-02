@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, BigInteger, DateTime
 from sqlalchemy.sql import func
-from db.batabase import Base
+from db.database import Base
 
 class UserTable(Base):
     __tablename__ = "users"

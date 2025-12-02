@@ -1,5 +1,6 @@
 from fastapi import logger,Depends,HTTPException,status
 from fastapi.security import OAuth2PasswordBearer,HTTPBearer
+from fastapi_mail import ConnectionConfig
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from pydantic import EmailStr
@@ -16,7 +17,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 security = HTTPBearer()  
 
-# JWT Configuration
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
@@ -24,7 +24,29 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRY_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRY_MINUTES"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS"))
 
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+MAIL_FROM = os.getenv("MAIL_FROM")
+MAIL_PORT = int(os.getenv("MAIL_PORT"))
+MAIL_SERVER = os.getenv("MAIL_SERVER")
+MAIL_STARTTLS = os.getenv("MAIL_STARTTLS").lower() == "true"
+MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS").lower() == "true"
 
+
+if not all([MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM]):
+    raise ValueError("Email configuration is incomplete. Please check your .env file.")
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=MAIL_USERNAME,
+    MAIL_PASSWORD=MAIL_PASSWORD,
+    MAIL_FROM=MAIL_FROM,
+    MAIL_PORT=MAIL_PORT,
+    MAIL_SERVER=MAIL_SERVER,
+    MAIL_STARTTLS=MAIL_STARTTLS,
+    MAIL_SSL_TLS=MAIL_SSL_TLS,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True,
+)
 
 
 def create_access_token(data: dict):

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import date
-from db.batabase import get_db
+from db.database import get_db
 from schema.nifty_schema import NiftyDataCreate, NiftyDataResponse, NiftyDataUpdate
 from service import nifty_service
 
