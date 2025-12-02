@@ -13,10 +13,9 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Username</th>
+                        <th>Full Name</th>
                         <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
+                        <th>Active</th>
                         <th>Last Login</th>
                         <th class="w-1">Actions</th>
                     </tr>
@@ -25,16 +24,9 @@
                     {% for user in users %}
                     <tr>
                         <td>{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
+                        <td>{{ user.full_name }}</td>
                         <td>{{ user.email }}</td>
-                        <td>{{ user.role }}</td>
-                        <td>
-                            {% if user.is_verified == 1 %}
-                            <span class="badge bg-success">Verified</span>
-                            {% else %}
-                            <span class="badge bg-warning">Unverified</span>
-                            {% endif %}
-                        </td>
+                        <td>{{ user.active }}</td>
                         <td>
                             {% if user.last_login %}
                                 {{ user.last_login }}

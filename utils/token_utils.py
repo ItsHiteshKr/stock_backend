@@ -29,8 +29,8 @@ MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
 MAIL_PORT = int(os.getenv("MAIL_PORT"))
 MAIL_SERVER = os.getenv("MAIL_SERVER")
-MAIL_STARTTLS = os.getenv("MAIL_STARTTLS").lower() == "true"
-MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS").lower() == "true"
+MAIL_STARTTLS = os.getenv("MAIL_STARTTLS")
+MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS")
 
 
 if not all([MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM]):
@@ -114,6 +114,15 @@ def store_refresh_token(email: EmailStr, refresh_token: str):
             time=timedelta(days=expire_days),
             value=refresh_token
         )
+        return True
+    except Exception as e:
+        print(f"Redis error: {e}")
+        return False
+    
+def delete_refresh_token(email:EmailStr):
+    """Delete refresh token from Redis"""
+    try:
+        redis_client.delete(f"refresh_token:{email:EmailStr}")
         return True
     except Exception as e:
         print(f"Redis error: {e}")

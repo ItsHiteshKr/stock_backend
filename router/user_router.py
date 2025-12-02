@@ -21,6 +21,7 @@ def get_user_data_by_user_id(user_id: int, db: Session = Depends(get_db)):
     """Get User data entry by user ID"""
     return UserService.get_user_data_by_user_id(user_id, db)
 
+
 @router.put("/{user_id}/activate")
 def activate_user(user_id: int, db: Session = Depends(get_db)):
     """Activate User account by user ID"""
@@ -32,25 +33,30 @@ def deactivate_user(user_id: int, db: Session = Depends(get_db)):
     """Deactivate User account by user ID"""
     return UserService.Active_deactivate_user(user_id, 0, db)
 
+
 @router.put("/{email}/activate")
 def activate_user(email: EmailStr, db: Session = Depends(get_db)):
     """Activate User account by email"""
     return UserService.Active_deactivate_user(email, 1, db)
+
 
 @router.put("/{email}/deactivate")
 def deactivate_user(email: EmailStr, db: Session = Depends(get_db)):
     """Deactivate User account by email"""
     return UserService.Active_deactivate_user(email, 0, db)
 
+
 @router.delete("/{user_id}")
 def delete_user_data_by_user_id(user_id: int, db: Session = Depends(get_db)):
     """Delete User data entry by user ID"""
     return UserService.delete_user_data_by_user_id(user_id, db)
 
+
 @router.delete("/by-email/{email}")
 def delete_user_data_by_email(email: EmailStr, db: Session = Depends(get_db)):
     """Delete User data entry by email"""
     return UserService.delete_user_data_by_email(email, db)
+
 
 @router.get("/", response_model=List[UserResponse])
 def get_all_users_data(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
