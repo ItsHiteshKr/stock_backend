@@ -1,31 +1,18 @@
-from fastapi import FastAPI, Request, Form, Depends, Response
+from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from db.database import get_db
 from typing import Optional
 import os
 import secrets
 from datetime import datetime
 import logging
-import model.user_model as usermodels
-from .user_routes import router as user_routes
-from .company_details_routes import router as company_details_routes
-from .mom_routes import router as mom_routes
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
+
 from db.database import get_db
-from typing import Optional
-import os
-import secrets
-from datetime import datetime
-import logging
 import model.user_model as usermodels
-from .user_routes import router as user_routes
-from .company_details_routes import router as company_details_routes
-from .mom_routes import router as mom_routes
+from router.user_router import user_router
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -34,9 +21,7 @@ from starlette.middleware.sessions import SessionMiddleware
 admin_panel = FastAPI(title="Concientech Admin")
 
 # Include routers
-admin_panel.include_router(user_routes, prefix="/user")
-admin_panel.include_router(company_details_routes, prefix="/company details")
-admin_panel.include_router(mom_routes, prefix="/mom")
+admin_panel.include_router(user_router, prefix="/user")
 
 # Add session middleware
 admin_panel.add_middleware(
@@ -183,81 +168,6 @@ async def list_users(
             }
         )
 
-# Timesheet Management route
-@admin_panel.get("/timesheet/timesheet", response_class=HTMLResponse)
-async def admin_timesheet(
-    request: Request, 
-    admin_username: str = Depends(admin_required)
-):
-    return templates.TemplateResponse(
-        "admin/timesheet/timesheet.html", 
-        {
-            "request": request,
-            "admin_name": admin_username
-        }
-    )
-
-# Calendar Management route
-@admin_panel.get("/calendar/calendar", response_class=HTMLResponse)
-async def admin_calendar(
-    request: Request, 
-    admin_username: str = Depends(admin_required)
-):
-    return templates.TemplateResponse(
-        "admin/calendar/calendar.html", 
-        {
-            "request": request,
-            "admin_name": admin_username
-        }
-    )
-
-# Policy Management route
-@admin_panel.get("/policy/policy", response_class=HTMLResponse)
-async def admin_policy(
-    request: Request, 
-    admin_username: str = Depends(admin_required)
-):
-    return templates.TemplateResponse(
-        "admin/policy/policy.html", 
-        {
-            "request": request,
-            "admin_name": admin_username
-        }
-    )
-
-# Leave Management route
-@admin_panel.get("/leave/leave", response_class=HTMLResponse)
-async def admin_leave(
-    request: Request, 
-    admin_username: str = Depends(admin_required)
-):
-    return templates.TemplateResponse(
-        "admin/leave/leave.html", 
-        {
-            "request": request,
-            "admin_name": admin_username
-        }
-    )
-
-# AI Tracker route
-@admin_panel.get("/ai-tracker", response_class=HTMLResponse)
-async def ai_tracker(
-    request: Request,
-    admin_username: str = Depends(admin_required),
-    db: Session = Depends(get_db)
-):
-    """AI Tracker page for admins"""
-    return templates.TemplateResponse(
-        "admin/ai tracker/ai-tracker.html",
-        {
-            "request": request,
-            "admin_name": admin_username,
-            "moms": [],  # We'll fetch this data from the client side
-            "user": db.query(usermodels.User).filter(usermodels.User.username == admin_username).first()
-        }
-    )
-
-
 # Root shows login page or redirects to dashboard
 @admin_panel.get("/", response_class=HTMLResponse)
 async def admin_root(request: Request):
@@ -293,14 +203,3 @@ async def admin_root_post(
     
     # Redirect to dashboard
     return RedirectResponse(url="/admin/dashboard", status_code=302)
-
-# Background Check Form route
-@admin_panel.get("/backgroundcheckform", response_class=HTMLResponse)
-async def background_check_form(
-    request: Request,
-    admin_username: str = Depends(admin_required)
-):
-    return templates.TemplateResponse(
-        "admin/backgroundcheckform.html",
-        {"request": request, "admin_name": admin_username}
-    )

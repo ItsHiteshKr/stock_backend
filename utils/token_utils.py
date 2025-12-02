@@ -119,6 +119,15 @@ def store_refresh_token(email: EmailStr, refresh_token: str):
         print(f"Redis error: {e}")
         return False
     
+def delete_refresh_token(email:EmailStr):
+    """Delete refresh token from Redis"""
+    try:
+        redis_client.delete(f"refresh_token:{email:EmailStr}")
+        return True
+    except Exception as e:
+        print(f"Redis error: {e}")
+        return False
+    
 
 def create_reset_token(email: EmailStr) -> str:
     """Create JWT token for password reset"""
