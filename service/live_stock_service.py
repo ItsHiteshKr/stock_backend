@@ -1,4 +1,4 @@
-import requests
+from fastapi import requests
 from datetime import datetime
 
 def get_live_nse_price(symbol: str):
