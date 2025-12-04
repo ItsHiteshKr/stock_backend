@@ -156,3 +156,89 @@ async def view_user(
         logging.error(f"Error viewing user: {str(e)}")
         return RedirectResponse(url="/admin/user/user_details", status_code=303)
 
+@router.get("/edit/{user_id}", response_class=HTMLResponse)
+async def edit_user_form(
+    request: Request,
+    user_id: int,
+    admin_username: str = Depends(admin_required),
+    db: Session = Depends(get_db)
+):
+    try:
+        user = db.query(usermodels.UserTable).filter(usermodels.UserTable.id == user_id).first()
+        if not user:
+            logging.error(f"User not found: {user_id}")
+            return RedirectResponse(url="/admin/user/user_details", status_code=303)
+            
+        logging.info(f"Editing user: {user_id}")
+        return templates.TemplateResponse(
+            "admin/user/edit_user.html",
+            {
+                "request": request,
+                "admin_name": admin_username,
+                "user": user,
+            }
+        )
+    except Exception as e:
+        logging.error(f"Error loading edit form: {str(e)}")
+        return RedirectResponse(url="/admin/user/user_details", status_code=303)
+
+@router.post("/edit/{user_id}", response_class=HTMLResponse)
+async def edit_user(
+    request: Request,
+    user_id: int,
+    admin_username: str = Depends(admin_required),
+    db: Session = Depends(get_db)
+):
+    try:
+        user = db.query(usermodels.UserTable).filter(usermodels.UserTable.id == user_id).first()
+        if not user:
+            logging.error(f"User not found: {user_id}")
+            return RedirectResponse(url="/admin/user/user_details", status_code=303)
+        
+        form = await request.form()
+        full_name = form.get("full_name")
+        email = form.get("email")
+        password = form.get("password")
+        
+        # Update user fields
+        if full_name:
+            user.full_name = full_name
+        if email:
+            user.email = email
+        if password:  # Only update password if provided
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            user.password = hashed_password.decode('utf-8')
+        
+        db.commit()
+        db.refresh(user)
+        
+        logging.info(f"User updated: {user_id}")
+        return RedirectResponse(url=f"/admin/user/view/{user_id}", status_code=303)
+        
+    except Exception as e:
+        logging.error(f"Error updating user: {str(e)}")
+        return RedirectResponse(url="/admin/user/user_details", status_code=303)
+
+@router.get("/delete/{user_id}", response_class=HTMLResponse)
+async def delete_user(
+    request: Request,
+    user_id: int,
+    admin_username: str = Depends(admin_required),
+    db: Session = Depends(get_db)
+):
+    try:
+        user = db.query(usermodels.UserTable).filter(usermodels.UserTable.id == user_id).first()
+        if not user:
+            logging.error(f"User not found: {user_id}")
+            return RedirectResponse(url="/admin/user/user_details", status_code=303)
+        
+        db.delete(user)
+        db.commit()
+        
+        logging.info(f"User deleted: {user_id}")
+        return RedirectResponse(url="/admin/user/user_details", status_code=303)
+        
+    except Exception as e:
+        logging.error(f"Error deleting user: {str(e)}")
+        return RedirectResponse(url="/admin/user/user_details", status_code=303)
+

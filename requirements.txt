@@ -12,6 +12,7 @@ passlib
 redis
 pymysql
 python-dotenv
+itsdangerous
 
 
 #  create virtual environment = python -m venv stock_env

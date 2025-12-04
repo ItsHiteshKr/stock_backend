@@ -11,7 +11,8 @@ import logging
 
 from db.database import get_db
 import model.user_model as usermodels
-from router.user_router import user_router
+from router.user_router import router as user_router
+from admin.user_routes import router as admin_user_router
 
 
 # Set up logging
@@ -21,7 +22,8 @@ from starlette.middleware.sessions import SessionMiddleware
 admin_panel = FastAPI(title="Concientech Admin")
 
 # Include routers
-admin_panel.include_router(user_router, prefix="/user")
+admin_panel.include_router(user_router, prefix="/api/user")
+admin_panel.include_router(admin_user_router, prefix="/user")
 
 # Add session middleware
 admin_panel.add_middleware(
@@ -96,7 +98,14 @@ async def admin_logout(request: Request):
 # Root route
 @admin_panel.get("/", response_class=HTMLResponse)
 async def admin_root(request: Request):
-    return RedirectResponse(url="/admin/dashboard", status_code=302)
+    # Check if user is authenticated
+    admin_username = request.session.get("admin_username")
+    if admin_username:
+        # If authenticated, go to dashboard
+        return RedirectResponse(url="/admin/dashboard", status_code=302)
+    else:
+        
+        return RedirectResponse(url="/admin/login", status_code=302)
 
 # Dashboard route - Shows dashboard.html with stats and user list
 @admin_panel.get("/dashboard", response_class=HTMLResponse)
@@ -107,8 +116,8 @@ async def admin_dashboard(
 ):
     try:
         # Get user statistics and all users for the table
-        user_count = db.query(usermodels.User).count()
-        users = db.query(usermodels.User).order_by(usermodels.User.id).all()
+        user_count = db.query(usermodels.UserTable).count()
+        users = db.query(usermodels.UserTable).order_by(usermodels.UserTable.id).all()
 
         logging.info(f"Dashboard: Found {user_count} total users")
         
@@ -144,7 +153,7 @@ async def list_users(
     db: Session = Depends(get_db)
 ):
     try:
-        users = db.query(usermodels.User).all()
+        users = db.query(usermodels.UserTable).all()
         logging.info(f"Found {len(users)} users")
         
         return templates.TemplateResponse(
@@ -167,39 +176,3 @@ async def list_users(
                 "error": str(e)
             }
         )
-
-# Root shows login page or redirects to dashboard
-@admin_panel.get("/", response_class=HTMLResponse)
-async def admin_root(request: Request):
-    # Check if user is authenticated
-    admin_username = request.session.get("admin_username")
-    if admin_username:
-        # If authenticated, go to dashboard
-        return RedirectResponse(url="/admin/dashboard", status_code=302)
-    else:
-        # If not authenticated, show login page
-        return templates.TemplateResponse("admin/login.html", {"request": request, "error": None})
-
-# Root POST handler (login form submission)
-@admin_panel.post("/", response_class=HTMLResponse)
-async def admin_root_post(
-    request: Request, 
-    username: str = Form(...), 
-    password: str = Form(...)
-):
-    # Validate credentials
-    is_username_correct = secrets.compare_digest(username, ADMIN_USERNAME)
-    is_password_correct = secrets.compare_digest(password, ADMIN_PASSWORD)
-    
-    if not (is_username_correct and is_password_correct):
-        return templates.TemplateResponse(
-            "admin/login.html", 
-            {"request": request, "error": "Invalid credentials"}
-        )
-    
-    # Set session
-    request.session["admin_username"] = username
-    request.session["login_time"] = datetime.now().isoformat()
-    
-    # Redirect to dashboard
-    return RedirectResponse(url="/admin/dashboard", status_code=302)

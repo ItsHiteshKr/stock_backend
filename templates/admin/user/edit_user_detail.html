@@ -26,8 +26,8 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name" value="{{ user.full_name }}" required>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -46,11 +46,10 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
-                        <label class="form-label">Role</label>
-                        <select class="form-select" name="role" required>
-                            <option value="employee" {% if user.role == 'employee' %}selected{% endif %}>Employee</option>
-                            <option value="hr" {% if user.role == 'hr' %}selected{% endif %}>HR</option>
-                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" required>
+                            <option value="1" {% if user.active == 1 %}selected{% endif %}>Active</option>
+                            <option value="0" {% if user.active == 0 %}selected{% endif %}>Not Active</option>
                         </select>
                     </div>
                 </div>

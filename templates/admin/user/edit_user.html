@@ -6,11 +6,11 @@
 <div class="card">
     <div class="card-header">
         <div class="d-flex justify-content-between space-x-2">
-            <h3 class="card-title">Edit User</h3>
             <a href="/admin/user/view/{{ user.id }}" class="btn btn-outline-primary btn-sm">
                 <i class="ti ml-1 ti-arrow-left"></i>
                 Back to User Details
             </a>
+            <h3 class="card-title">Edit User</h3>
         </div>
     </div>
     <div class="card-body">
@@ -19,24 +19,14 @@
                 <!-- User Information -->
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name" value="{{ user.full_name }}" required>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label class="form-label">Email</label>
                         <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">Role</label>
-                        <select class="form-select" name="role" required>
-                            {% for role in roles %}
-                            <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role|title }}</option>
-                            {% endfor %}
-                        </select>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
