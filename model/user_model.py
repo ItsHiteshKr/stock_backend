@@ -12,5 +12,6 @@ class UserTable(Base):
     password = Column(String(100), nullable=False)
     country = Column(String(50), nullable=True, default='IN')
     active = Column(Integer, default=1)
+    last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())

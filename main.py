@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, Response, status, Request
 from fastapi_mail import FastMail, MessageSchema, MessageType
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 import os
 import bcrypt
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 from router.user_router import router as user_router
 from router.nifty_router import router as nifty_router
+from admin.admin_panel import admin_panel
 
 load_dotenv()
 
@@ -65,6 +66,9 @@ app.include_router(user_router, tags=["User Management"])
 app.include_router(nifty_router, tags=["Nifty Stock Data"])
 app.include_router(live_stock_router, tags=["Live Stock Data"])
 
+
+# Mount admin panel
+app.mount("/admin", admin_panel)
 
 
 @app.get("/")
@@ -128,6 +132,7 @@ async def user_login(user: LoginRequest, response: Response, db: Session = Depen
         response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
 
         try:
+            db_user.last_login = func.now()
             db.commit()
         except Exception as e:
             db.rollback()
