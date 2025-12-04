@@ -1,5 +1,6 @@
-from fastapi import requests
+import requests
 from datetime import datetime
+from sqlalchemy.orm import Session
 
 def get_live_nse_price(symbol: str):
     url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol}"
