@@ -6,8 +6,12 @@ router = APIRouter()
 
 @router.get("/stocks/price/{symbol}", response_model=StockPriceResponse)
 def live_stock_price(symbol: str):
+    """
+    Get live price of NSE symbol safely.
+    """
     try:
         data = get_live_nse_price(symbol.upper())
         return data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching data: {str(e)}")
+        # Return clear error to the API user
+        raise HTTPException(status_code=500, detail=f"Error fetching {symbol}: {str(e)}")
