@@ -37,3 +37,23 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 ADMIN_USERNAME =
 ADMIN_PASSWORD =
+
+
+
+
+# How to Update the Fundamentals Table
+
+After starting the main FastAPI server, run the following command once (in new cmd) to fetch and store all fundamental data into the database:
+
+python -m service.update_fundamentals_live
+
+
+This script:
+
+Downloads live stock fundamentals
+
+Updates the MySQL/PostgreSQL database
+
+Fills the fundamentals table automatically
+
+# Make sure your .env file is configured before running it.
