@@ -15,6 +15,8 @@ from model.user_model import UserTable
 from schema.user_schema import UserCreate, UserResponse
 from utils import token_utils as utils
 from utils.token_utils import conf
+from router.live_stock_router import router as live_stock_router
+
 
 
 logger = logging.getLogger(__name__)
@@ -62,6 +64,8 @@ app.add_middleware(
 # Include routers
 app.include_router(user_router, tags=["User Management"])
 app.include_router(nifty_router, tags=["Nifty Stock Data"])
+app.include_router(live_stock_router, tags=["Live Stock Data"])
+
 
 # Mount admin panel
 app.mount("/admin", admin_panel)
