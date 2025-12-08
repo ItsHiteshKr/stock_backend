@@ -10,13 +10,17 @@ import uvicorn
 import traceback
 import logging
 from pydantic import BaseModel, EmailStr
-from db.database import get_db
+from db.database import get_db, Base, engine
 from model.user_model import UserTable
+from model.stock_model import StockFundamentals
+from model.daily_data import DailyData
 from schema.user_schema import UserCreate, UserResponse
 from utils import token_utils as utils
 from utils.token_utils import conf
 from router.live_stock_router import router as live_stock_router
 from router.screener_router import router as screener_router
+from router.analysis_router import router as analysis_router
+
 
 
 logger = logging.getLogger(__name__)
@@ -66,6 +70,7 @@ app.include_router(user_router, tags=["User Management"])
 app.include_router(nifty_router, tags=["Nifty Stock Data"])
 app.include_router(live_stock_router, tags=["Live Stock Data"])
 app.include_router(screener_router, tags=["Stock Screener"])
+app.include_router(analysis_router, tags=["Monthly & Historical Analysis"])
 
 # Mount admin panel
 app.mount("/admin", admin_panel)
@@ -337,3 +342,6 @@ async def reset_password_confirm(request: PasswordResetConfirm, db: Session = De
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+Base.metadata.create_all(bind=engine)
