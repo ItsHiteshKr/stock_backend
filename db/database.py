@@ -16,13 +16,6 @@ DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 MYSQL_URL_DATABASE = os.getenv("DATABASE_URL")
 
 # Fallback: construct URL if DATABASE_URL not found
@@ -36,4 +29,11 @@ if not MYSQL_URL_DATABASE:
 engine = create_engine(MYSQL_URL_DATABASE, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 

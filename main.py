@@ -12,15 +12,13 @@ import logging
 from pydantic import BaseModel, EmailStr
 from db.database import get_db, Base, engine
 from model.user_model import UserTable
-from model.stock_model import StockFundamentals
-from model.daily_data import DailyData
 from schema.user_schema import UserCreate, UserResponse
 from utils import token_utils as utils
 from utils.token_utils import conf
 from router.live_stock_router import router as live_stock_router
 from router.screener_router import router as screener_router
 from router.analysis_router import router as analysis_router
-
+from router.watchlist_router import router as watchlist_router
 
 
 logger = logging.getLogger(__name__)
@@ -55,6 +53,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Create all tables on startup
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created successfully")
+
 
 # CORS middleware configuration
 app.add_middleware(
@@ -71,6 +75,7 @@ app.include_router(nifty_router, tags=["Nifty Stock Data"])
 app.include_router(live_stock_router, tags=["Live Stock Data"])
 app.include_router(screener_router, tags=["Stock Screener"])
 app.include_router(analysis_router, tags=["Monthly & Historical Analysis"])
+app.include_router(watchlist_router, tags=["Watchlist Management"])
 
 # Mount admin panel
 app.mount("/admin", admin_panel)
