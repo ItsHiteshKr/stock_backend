@@ -29,8 +29,8 @@ MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
 MAIL_PORT = int(os.getenv("MAIL_PORT"))
 MAIL_SERVER = os.getenv("MAIL_SERVER")
-MAIL_STARTTLS = os.getenv("MAIL_STARTTLS").lower() == "true"
-MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS").lower() == "true"
+MAIL_STARTTLS = os.getenv("MAIL_STARTTLS")
+MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS")
 
 
 if not all([MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM]):

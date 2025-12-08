@@ -13,6 +13,9 @@ redis
 pymysql
 python-dotenv
 itsdangerous
+numpy
+pandas
+yfinance
 
 
 #  create virtual environment = python -m venv stock_env

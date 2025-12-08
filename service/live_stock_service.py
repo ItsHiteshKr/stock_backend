@@ -1,17 +1,15 @@
-import requests
+import yfinance as yf
 from datetime import datetime
-from sqlalchemy.orm import Session
 
-def get_live_nse_price(symbol: str):
-    url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol}"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-    session = requests.Session()
-    session.get("https://www.nseindia.com", headers=headers)
-    response = session.get(url, headers=headers)
-    data = response.json()
-    price = data['priceInfo']['lastPrice']
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return {"symbol": symbol, "price": price, "timestamp": timestamp}
+def get_live_yf_price(symbol: str):
+    try:
+        stock = yf.Ticker(symbol)
+        data = stock.history(period="1d", interval="1m")
+        if not data.empty:
+            price = data['Close'][-1]
+        else:
+            price = 0.0
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return {"symbol": symbol, "price": price, "timestamp": timestamp}
+    except Exception as e:
+        raise Exception(f"Failed to fetch {symbol} price: {e}")
