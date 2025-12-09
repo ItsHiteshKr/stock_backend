@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import EmailStr
@@ -19,7 +19,7 @@ def create_watchlist(watchlist: WatchlistCreate, db: Session = Depends(get_db)):
     {
         "email": "user@example.com",
         "watchlist_name": "My Tech Stocks",
-        "symbols": ["RELIANCE", "TCS", "INFY", "WIPRO"]
+        "symbols": ["RELIANCE.NS", "TCS.NS", "INFY.NS", "WIPRO.NS", "HDFCBANK.NS"]
     }
     """
     return WatchlistService.create_watchlist(watchlist, db)
@@ -41,7 +41,7 @@ def update_watchlist(watchlist_id: int, watchlist: WatchlistUpdate, db: Session 
     Example:
     {
         "watchlist_name": "Updated Name",
-        "symbols": ["RELIANCE", "TCS", "HDFCBANK"]
+        "symbols": ["RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "ICICIBANK.NS"]
     }
     """
     return WatchlistService.update_watchlist(watchlist_id, watchlist, db)

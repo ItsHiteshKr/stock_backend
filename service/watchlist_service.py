@@ -156,6 +156,11 @@ class WatchlistService:
             
             # Remove symbol
             current_symbols.remove(symbol)
+
+            # Force SQLAlchemy to recognize the change
+            watchlist.symbol = None
+            db.flush()
+            
             watchlist.symbol = current_symbols
             
             db.commit()
