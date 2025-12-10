@@ -16,6 +16,8 @@ itsdangerous
 numpy
 pandas
 yfinance
+pandas 
+ta
 
 
 #  create virtual environment = python -m venv stock_env
