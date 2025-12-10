@@ -1,6 +1,10 @@
 from sqlalchemy import extract, func, and_
 from model.daily_data import DailyData
 from datetime import datetime
+import pandas as pd
+import numpy as np
+from sqlalchemy.orm import Session
+import ta
 
 # ---------------------------------------------------------
 # 1. MONTHLY ANALYSIS (Open / Close / High / Low)
@@ -140,3 +144,110 @@ def parse_date(date_str: str):
         except ValueError:
             continue
     raise ValueError(f"Invalid date format: {date_str}. Allowed formats: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY")
+
+
+def get_price_dataframe(db: Session, symbol: str, limit: int = 200):
+    """
+    Fetch latest 'limit' candles for the symbol.
+    Oldest first (required for indicators).
+    """
+    rows = (
+        db.query(DailyData)
+        .filter(DailyData.symbol == symbol)
+        .order_by(DailyData.date.desc())
+        .limit(limit)
+        .all()
+    )
+
+    if not rows:
+        return None
+
+    rows.reverse()
+
+    df = pd.DataFrame([{
+        "date": r.date,
+        "open": r.open,
+        "high": r.high,
+        "low": r.low,
+        "close": r.close,
+        "volume": r.volume,
+    } for r in rows])
+
+    return df
+
+
+# ---------------------------------------------
+# 2) Simple Moving Average (SMA)
+# ---------------------------------------------
+def calculate_sma(df: pd.DataFrame, period: int = 20):
+    df["SMA"] = df["close"].rolling(period).mean()
+    return df[["date", "close", "SMA"]].dropna()
+
+
+# ---------------------------------------------
+# 3) Exponential Moving Average (EMA)
+# ---------------------------------------------
+def calculate_ema(df: pd.DataFrame, period: int = 20):
+    df["EMA"] = df["close"].ewm(span=period, adjust=False).mean()
+    return df[["date", "close", "EMA"]]
+
+
+# ---------------------------------------------
+# 4) Relative Strength Index (RSI)
+# ---------------------------------------------
+def calculate_rsi(df: pd.DataFrame, period: int = 14):
+    delta = df["close"].diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+
+    avg_gain = gain.rolling(period).mean()
+    avg_loss = loss.rolling(period).mean()
+
+    rs = avg_gain / avg_loss
+    df["RSI"] = 100 - (100 / (1 + rs))
+
+    return df[["date", "close", "RSI"]].dropna()
+
+
+# ---------------------------------------------
+# 5) MACD (12-26-9)
+# ---------------------------------------------
+def calculate_macd(df: pd.DataFrame):
+    ema12 = df["close"].ewm(span=12, adjust=False).mean()
+    ema26 = df["close"].ewm(span=26, adjust=False).mean()
+
+    df["MACD"] = ema12 - ema26
+    df["Signal"] = df["MACD"].ewm(span=9, adjust=False).mean()
+    df["Histogram"] = df["MACD"] - df["Signal"]
+
+    return df[["date", "MACD", "Signal", "Histogram"]]
+
+
+# ---------------------------------------------
+# 6) Bollinger Bands (20-period)
+# ---------------------------------------------
+def calculate_bollinger(df: pd.DataFrame, period: int = 20):
+    sma = df["close"].rolling(period).mean()
+    std = df["close"].rolling(period).std()
+
+    df["Middle"] = sma
+    df["Upper"] = sma + (std * 2)
+    df["Lower"] = sma - (std * 2)
+
+    return df[["date", "close", "Upper", "Middle", "Lower"]].dropna()
+
+
+# ---------------------------------------------
+# 7) Return ALL indicators at once
+# ---------------------------------------------
+def calculate_all_indicators(df: pd.DataFrame):
+    """
+    Returns SMA, EMA, RSI, MACD, Bollinger in a single response.
+    """
+    return {
+        "SMA_20": calculate_sma(df.copy(), 20).tail(1).to_dict(orient="records")[0],
+        "EMA_20": calculate_ema(df.copy(), 20).tail(1).to_dict(orient="records")[0],
+        "RSI_14": calculate_rsi(df.copy(), 14).tail(1).to_dict(orient="records")[0],
+        "MACD": calculate_macd(df.copy()).tail(1).to_dict(orient="records")[0],
+        "Bollinger": calculate_bollinger(df.copy(), 20).tail(1).to_dict(orient="records")[0],
+    }
