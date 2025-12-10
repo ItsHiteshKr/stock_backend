@@ -30,6 +30,7 @@ class WatchlistService:
             db.refresh(new_watchlist)
             
             return new_watchlist
+        
         except HTTPException:
             raise
         except Exception as e:
@@ -42,6 +43,7 @@ class WatchlistService:
         try:
             watchlists = db.query(Watchlist).filter(Watchlist.email == email).all()
             return watchlists
+           
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error fetching watchlists: {str(e)}")
     
@@ -53,6 +55,7 @@ class WatchlistService:
             if not watchlist:
                 raise HTTPException(status_code=404, detail="Watchlist not found")
             return watchlist
+            
         except HTTPException:
             raise
         except Exception as e:
@@ -64,17 +67,15 @@ class WatchlistService:
         try:
             watchlist = db.query(Watchlist).filter(Watchlist.id == watchlist_id).first()
             if not watchlist:
-                raise HTTPException(status_code=404, detail="Watchlist not found")
+                raise HTTPException(status_code=404, detail="Watchlist not found at this ID")
             
             if watchlist_data.watchlist_name is not None:
                 watchlist.watchlist_name = watchlist_data.watchlist_name
             
-            if watchlist_data.symbols is not None:
-                watchlist.symbol = watchlist_data.symbols  # Update JSON array
-            
             db.commit()
             db.refresh(watchlist)
             return watchlist
+        
         except HTTPException:
             raise
         except Exception as e:
@@ -92,6 +93,7 @@ class WatchlistService:
             db.delete(watchlist)
             db.commit()
             return {"message": "Watchlist deleted successfully"}
+        
         except HTTPException:
             raise
         except Exception as e:
@@ -132,10 +134,10 @@ class WatchlistService:
             db.refresh(watchlist)
             
             return watchlist
+             
         except HTTPException:
             raise
         except Exception as e:
-            import traceback
             db.rollback()
             raise HTTPException(status_code=500, detail=f"Error adding symbol: {str(e)}")
     
@@ -166,6 +168,7 @@ class WatchlistService:
             db.commit()
             db.refresh(watchlist)
             return watchlist
+        
         except HTTPException:
             raise
         except Exception as e:
