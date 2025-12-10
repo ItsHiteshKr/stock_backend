@@ -19,6 +19,7 @@ from router.live_stock_router import router as live_stock_router
 from router.screener_router import router as screener_router
 from router.analysis_router import router as analysis_router
 from router.watchlist_router import router as watchlist_router
+from router.indicators_router import router as indicators_router
 
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,7 @@ app.include_router(live_stock_router, tags=["Live Stock Data"])
 app.include_router(screener_router, tags=["Stock Screener"])
 app.include_router(analysis_router, tags=["Monthly & Historical Analysis"])
 app.include_router(watchlist_router, tags=["Watchlist Management"])
+app.include_router(indicators_router,tags=["Technical Indicators"])
 
 # Mount admin panel
 app.mount("/admin", admin_panel)
