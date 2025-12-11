@@ -9,7 +9,11 @@ class WatchlistCreate(BaseModel):
 class WatchlistUpdate(BaseModel):
     watchlist_name: Optional[str] = None
 
-class WatchlistResponse(BaseModel):
+class WatchlistListsResponse(BaseModel):
+    id: int
+    watchlist_name: str
+
+class WatchlistDetailsResponse(BaseModel):
     id: int
     email: str
     watchlist_name: str

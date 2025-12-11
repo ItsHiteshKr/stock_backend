@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from model.watchlist_model import Watchlist
-from schema.watchlist_schema import WatchlistCreate, WatchlistUpdate
+from schema.watchlist_schema import WatchlistCreate, WatchlistUpdate,WatchlistListsResponse
 
 class WatchlistService:
     
@@ -38,7 +38,18 @@ class WatchlistService:
             raise HTTPException(status_code=500, detail=f"Error creating watchlist: {str(e)}")
     
     @staticmethod
-    def get_user_watchlists(email: str, db: Session):
+    def get_user_all_watchlists_list(email: str, db: Session):
+        """Get all watchlists for a user"""
+        try:
+            watchlists = db.query(Watchlist).filter(Watchlist.email == email).all()
+            return watchlists
+           
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error fetching watchlists: {str(e)}")
+        
+    
+    @staticmethod
+    def get_user_all_watchlists_detail(email: str, db: Session):
         """Get all watchlists for a user"""
         try:
             watchlists = db.query(Watchlist).filter(Watchlist.email == email).all()
