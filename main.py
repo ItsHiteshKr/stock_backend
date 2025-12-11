@@ -30,7 +30,9 @@ from admin.admin_panel import admin_panel
 
 load_dotenv()
 
-frontend_url = os.getenv("Frontend_URL")       
+frontend_url = os.getenv("Frontend_URL") 
+ENABLE_DOCS=os.getenv("ENABLE_DOCS", "false").lower() == "true"
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -51,7 +53,10 @@ class PasswordResetConfirm(BaseModel):
 app = FastAPI(
     title="Nifty Stock API",
     description="API for managing Nifty stock data",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs" if ENABLE_DOCS else None,       # disable Swagger UI
+    redoc_url="/redoc" if ENABLE_DOCS else None,      # disable ReDoc UI
+    openapi_url="/openapi.json" if ENABLE_DOCS else None,     # hide API schema as well (more secure)
 )
 
 # Create all tables on startup
