@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, computed_field
 from typing import List, Optional
 
 class WatchlistCreate(BaseModel):
@@ -8,13 +8,21 @@ class WatchlistCreate(BaseModel):
 
 class WatchlistUpdate(BaseModel):
     watchlist_name: Optional[str] = None
-    symbols: Optional[List[str]] = None
 
-class WatchlistResponse(BaseModel):
+class WatchlistListsResponse(BaseModel):
+    id: int
+    watchlist_name: str
+
+class WatchlistDetailsResponse(BaseModel):
     id: int
     email: str
     watchlist_name: str
     symbol: List[str] 
+    
+    @computed_field
+    @property
+    def symbol_count(self) -> int:
+        return len(self.symbol or [])
     
     class Config:
         from_attributes = True
