@@ -14,3 +14,4 @@ class DailyData(Base):
     volume = Column(BigInteger)
 
     __table_args__ = (UniqueConstraint("symbol", "date"),)
+

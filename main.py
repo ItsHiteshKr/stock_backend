@@ -20,6 +20,9 @@ from router.screener_router import router as screener_router
 from router.analysis_router import router as analysis_router
 from router.watchlist_router import router as watchlist_router
 from router.indicators_router import router as indicators_router
+from router.comparison_routes import router as comparison_routes
+from router.stocks_router_for_UI import router as stocks_router_for_UI
+from router.index_router_for_UI import router as index_router_for_UI
 
 
 logger = logging.getLogger(__name__)
@@ -78,6 +81,11 @@ app.include_router(screener_router, tags=["Stock Screener"])
 app.include_router(analysis_router, tags=["Monthly & Historical Analysis"])
 app.include_router(watchlist_router, tags=["Watchlist Management"])
 app.include_router(indicators_router,tags=["Technical Indicators"])
+app.include_router(comparison_routes,tags=["Stock Comparison"])
+app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
+app.include_router(index_router_for_UI, tags=["Search and list Indices"])
+
+
 
 # Mount admin panel
 app.mount("/admin", admin_panel)
