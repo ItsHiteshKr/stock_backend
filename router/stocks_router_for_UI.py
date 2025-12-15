@@ -50,3 +50,32 @@ def popular_stocks(limit: int = 20, db: Session = Depends(get_db)):
         .all()
     )
     return [{"symbol": r[0], "volume": float(r[1])} for r in result]
+
+
+
+# HISTORICAL DATA FOR A SYMBOL
+@router.get("/historical/{symbol}")
+def historical_data(symbol: str, days: int = 1825, db: Session = Depends(get_db)):
+    cutoff = datetime.now().date() - timedelta(days=days)
+    rows = (
+        db.query(DailyData)
+        .filter(DailyData.symbol == symbol, DailyData.date >= cutoff)
+        .order_by(DailyData.date.asc())
+        .all()
+    )
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No data found for symbol")
+
+    return [
+        {
+            "symbol": r.symbol,
+            "date": r.date,
+            "open": float(r.open),
+            "high": float(r.high),
+            "low": float(r.low),
+            "close": float(r.close),
+            "volume": float(r.volume),
+        }
+        for r in rows
+    ]

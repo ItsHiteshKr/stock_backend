@@ -16,9 +16,22 @@ def get_live_yf_price(symbol: str):
     try:
         stock = yf.Ticker(symbol)
 
-        # Price (fast path from history)
-        data = stock.history(period="1d", interval="1m")
-        price = data['Close'][-1] if not data.empty else 0.0
+        # Fetch 2-day history to get previousClose and today's OHLCV
+        data = stock.history(period="2d", interval="1d")
+        
+        if data.empty or len(data) < 1:
+            raise Exception(f"No data available for {symbol}")
+        
+        # Current day (latest row)
+        current = data.iloc[-1]
+        price = float(current['Close'])
+        high = float(current['High'])
+        low = float(current['Low'])
+        open_price = float(current['Open'])
+        volume = int(current['Volume']) if current['Volume'] > 0 else 0
+        
+        # Previous close (if we have 2 days)
+        previousClose = float(data.iloc[-2]['Close']) if len(data) >= 2 else price
 
         # Metadata (name/sector/market cap). This can fail on some tickers, so keep it guarded.
         try:
@@ -38,6 +51,11 @@ def get_live_yf_price(symbol: str):
         return {
             "symbol": symbol,
             "price": price,
+            "open": open_price,
+            "high": high,
+            "low": low,
+            "volume": volume,
+            "previousClose": previousClose,
             "timestamp": timestamp,
             "name": name,
             "sector": sector,
