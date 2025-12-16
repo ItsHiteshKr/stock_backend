@@ -12,8 +12,7 @@ router = APIRouter(prefix="/indices",)
 
 # -----------------------------------------
 # 1️⃣ LIST ALL INDICES
-# /indices/list
-# -----------------------------------------
+# /indices/li---
 @router.get("/list", response_model=list[str])
 def list_indices(db: Session = Depends(get_db)):
     result = db.query(IndexStock.index_name).distinct().all()
