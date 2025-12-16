@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func,desc
 from db.database import get_db
 from model.index import IndexStock
-from model.daily_data import DailyData
 
 from schema.index_schema_UI import IndexBase, IndexListResponse, PopularIndexResponse
 from datetime import datetime, timedelta
