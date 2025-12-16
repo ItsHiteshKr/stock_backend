@@ -23,6 +23,8 @@ from router.indicators_router import router as indicators_router
 from router.comparison_routes import router as comparison_routes
 from router.stocks_router_for_UI import router as stocks_router_for_UI
 from router.index_router_for_UI import router as index_router_for_UI
+from router.insights_router import router as insights_router
+
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +91,7 @@ app.include_router(indicators_router,tags=["Technical Indicators"])
 app.include_router(comparison_routes,tags=["Stock Comparison"])
 app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
+app.include_router(insights_router)
 
 
 
