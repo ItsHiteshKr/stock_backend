@@ -23,7 +23,7 @@ from router.indicators_router import router as indicators_router
 from router.comparison_routes import router as comparison_routes
 from router.stocks_router_for_UI import router as stocks_router_for_UI
 from router.index_router_for_UI import router as index_router_for_UI
-
+from router.trend_router import router as trend_router
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +57,9 @@ app = FastAPI(
     title="Nifty Stock API",
     description="API for managing Nifty stock data",
     version="1.0.0",
-    docs_url="/docs" if ENABLE_DOCS else None,       # disable Swagger UI
-    redoc_url="/redoc" if ENABLE_DOCS else None,      # disable ReDoc UI
-    openapi_url="/openapi.json" if ENABLE_DOCS else None,     # hide API schema as well (more secure)
+    docs_url="/docs", #if ENABLE_DOCS else None,       # disable Swagger UI
+    redoc_url="/redoc", #if ENABLE_DOCS else None,      # disable ReDoc UI
+    openapi_url="/openapi.json", #if ENABLE_DOCS else None,     # hide API schema as well (more secure)
 )
 
 # Create all tables on startup
@@ -89,7 +89,7 @@ app.include_router(indicators_router,tags=["Technical Indicators"])
 app.include_router(comparison_routes,tags=["Stock Comparison"])
 app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
-
+app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
 
 
 # Mount admin panel
