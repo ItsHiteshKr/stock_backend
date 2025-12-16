@@ -54,3 +54,4 @@ This script:
 - Fills the fundamentals table automatically
 
 Make sure your `.env` file is configured before running it.
+
