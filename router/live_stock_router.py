@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from model.intraday_model import IntradayData
 from schema.live_stock_schema import StockPriceResponse
 from service.live_stock_service import get_live_yf_price  # updated
+from db.database import get_db
 import yfinance as yf
 from datetime import datetime
 
@@ -16,7 +19,7 @@ def live_stock_price(symbol: str):
 
 
 @router.get("/stocks/intraday/{symbol}")
-def intraday_series(symbol: str):
+def intraday_series(symbol: str, db: Session = Depends(get_db)):
     """Return today's 1m intraday OHLCV for the symbol.
     Does not persist to DB; used for live 1D chart.
     """
@@ -31,7 +34,7 @@ def intraday_series(symbol: str):
         for idx, row in df.iterrows():
             # idx is pandas Timestamp
             ts = idx.to_pydatetime()
-            out.append({
+            data_dict = {
                 "symbol": sym,
                 "date": ts.isoformat(),
                 "open": float(row.get("Open", 0.0)),
@@ -39,8 +42,23 @@ def intraday_series(symbol: str):
                 "low": float(row.get("Low", 0.0)),
                 "close": float(row.get("Close", 0.0)),
                 "volume": float(row.get("Volume", 0.0)),
-            })
+            }
+            out.append(data_dict)
 
+            # DB me save 
+            intraday_record = IntradayData(
+                symbol=sym,
+                timestamp=ts,
+                open=data_dict["open"],
+                high=data_dict["high"],
+                low=data_dict["low"],
+                close=data_dict["close"],
+                volume=data_dict["volume"]
+            )
+            db.add(intraday_record)
+        # Commit in the DB after loop
+        db.commit()
         return out
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch intraday for {symbol}: {e}")

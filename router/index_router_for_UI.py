@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/indices",)
 
-
 # -----------------------------------------
 # 1️⃣ LIST ALL INDICES
 # /indices/list
