@@ -1,3 +1,5 @@
+from model.intraday_model import IntradayData
+from db.database import SessionLocal
 import re
 import yfinance as yf
 from datetime import datetime
@@ -65,3 +67,28 @@ def get_live_yf_price(symbol: str):
         }
     except Exception as e:
         raise Exception(f"Failed to fetch {symbol} price: {e}")
+    
+def _persist_intraday_batch(sym: str, rows: list[dict]):
+    db = SessionLocal()
+    try:
+        for r in rows:
+            exists = db.query(IntradayData.id).filter(
+                IntradayData.symbol == sym,
+                IntradayData.timestamp == r["timestamp"]
+            ).first()
+            if exists:
+                continue
+            db.add(IntradayData(
+                symbol=sym,
+                timestamp=r["timestamp"],
+                open=r["open"],
+                high=r["high"],
+                low=r["low"],
+                close=r["close"],
+                volume=r["volume"],
+            ))
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
