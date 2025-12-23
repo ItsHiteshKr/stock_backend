@@ -92,14 +92,10 @@ app.include_router(indicators_router,tags=["Technical Indicators"])
 app.include_router(comparison_routes,tags=["Stock Comparison"])
 app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
-<<<<<<< HEAD
 app.include_router(insights_router)
 app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
 
 
-=======
-app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
->>>>>>> 903510a (Add trend analysis API and ignore database files)
 
 
 
