@@ -51,7 +51,7 @@ def get_rsi(symbol: str, period: int = 14, db: Session = Depends(get_db)):
 # ---------------------------------------------
 @router.get("/macd/{symbol}")
 def get_macd(symbol: str, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol, limit=300)  # MACD needs more data
+    df = get_price_dataframe(db, symbol)  # MACD needs more data
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_macd(df).to_dict(orient="records")
