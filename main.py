@@ -60,9 +60,9 @@ app = FastAPI(
     title="Nifty Stock API",
     description="API for managing Nifty stock data",
     version="1.0.0",
-    docs_url="/docs",  #if ENABLE_DOCS else None,       # disable Swagger UI
-    redoc_url="/redoc", #if ENABLE_DOCS else None,      # disable ReDoc UI
-    openapi_url="/openapi.json", #if ENABLE_DOCS else None,     # hide API schema as well (more secure)
+    docs_url="/docs" if ENABLE_DOCS else None,       # disable Swagger UI
+    redoc_url="/redoc" if ENABLE_DOCS else None,      # disable ReDoc UI
+    openapi_url="/openapi.json" if ENABLE_DOCS else None,     # hide API schema as well (more secure)
 )
 
 # Create all tables on startup
