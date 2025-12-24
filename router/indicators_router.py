@@ -61,11 +61,25 @@ def get_macd(symbol: str, db: Session = Depends(get_db)):
 # Bollinger Bands
 # ---------------------------------------------
 @router.get("/bollinger/{symbol}")
-def get_bollinger(symbol: str, db: Session = Depends(get_db)):
+def get_bollinger(
+    symbol: str,
+    period: int = 20,   # IMPORTANT
+    db: Session = Depends(get_db)
+):
     df = get_price_dataframe(db, symbol)
-    if df is None:
-        raise HTTPException(404, "No data found")
-    return calculate_bollinger(df).to_dict(orient="records")
+    if df is None or df.empty:
+        return []
+
+    # calculate bollinger with given period
+    df['middle'] = df['close'].rolling(period).mean()
+    df['std'] = df['close'].rolling(period).std()
+    df['upper'] = df['middle'] + (2 * df['std'])
+    df['lower'] = df['middle'] - (2 * df['std'])
+
+    result = df[['date', 'upper', 'middle', 'lower']].dropna()
+    return result.to_dict(orient="records")
+
+
 
 
 # ---------------------------------------------
