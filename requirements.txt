@@ -19,6 +19,9 @@ yfinance
 pandas 
 ta
 python-dateutil
+celery
+celery[redis]
+flower
 
 
 #  create virtual environment = python -m venv stock_env

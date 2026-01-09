@@ -25,6 +25,7 @@ from router.stocks_router_for_UI import router as stocks_router_for_UI
 from router.index_router_for_UI import router as index_router_for_UI
 from router.insights_router import router as insights_router
 from router.gainer_looser_router import router as gainer_looser_router
+from router.user_extraDetails_router import router as user_extraDetails_router
 
 
 
@@ -94,6 +95,7 @@ app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
 app.include_router(insights_router)
 app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
+app.include_router(user_extraDetails_router, tags=["User Extra Details"])
 
 
 

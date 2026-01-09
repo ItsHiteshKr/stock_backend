@@ -1,5 +1,5 @@
 
-from db.database import get_db, Base
+from db.database import  Base
 from sqlalchemy import Column, Integer, String, Float, DateTime, BigInteger, UniqueConstraint
 
 # Create Intraday model

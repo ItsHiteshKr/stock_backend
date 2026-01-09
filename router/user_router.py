@@ -22,37 +22,41 @@ def get_user_data_by_user_id(user_id: int, db: Session = Depends(get_db)):
     return UserService.get_user_data_by_user_id(user_id, db)
 
 
-@router.put("/{user_id}/activate")
+@router.put("/{user_id}/activate",response_model=UserResponse)
 def activate_user(user_id: int, db: Session = Depends(get_db)):
     """Activate User account by user ID"""
     return UserService.Active_deactivate_user(user_id, 1, db)
 
 
-@router.put("/{user_id}/deactivate")
+@router.put("/{user_id}/deactivate",response_model=UserResponse)
 def deactivate_user(user_id: int, db: Session = Depends(get_db)):
     """Deactivate User account by user ID"""
     return UserService.Active_deactivate_user(user_id, 0, db)
 
 
-@router.put("/{email}/activate")
+@router.put("/{email}/activate", response_model=UserResponse)
 def activate_user(email: EmailStr, db: Session = Depends(get_db)):
     """Activate User account by email"""
     return UserService.Active_deactivate_user(email, 1, db)
 
 
-@router.put("/{email}/deactivate")
+@router.delete("/{user_id}", response_model=UserResponse)
+def delete_user_data_by_user_id(user_id: int, db: Session = Depends(get_db)):
+    """Delete User data entry by user ID"""
+    return UserService.delete_user_data_by_user_id(user_id, db)
+    
+@router.get("/by-email/{email}",response_model=UserResponse)
+def get_user_data_by_email(email: EmailStr, db: Session = Depends(get_db)):
+    """Get User data entry by email"""
+    return UserService.get_user_data_by_user_email(email, db)
+
+
+@router.put("/{email}/deactivate", response_model=UserResponse)
 def deactivate_user(email: EmailStr, db: Session = Depends(get_db)):
     """Deactivate User account by email"""
     return UserService.Active_deactivate_user(email, 0, db)
 
-
-@router.delete("/{user_id}")
-def delete_user_data_by_user_id(user_id: int, db: Session = Depends(get_db)):
-    """Delete User data entry by user ID"""
-    return UserService.delete_user_data_by_user_id(user_id, db)
-
-
-@router.delete("/by-email/{email}")
+@router.delete("/by-email/{email}", response_model=UserResponse)
 def delete_user_data_by_email(email: EmailStr, db: Session = Depends(get_db)):
     """Delete User data entry by email"""
     return UserService.delete_user_data_by_email(email, db)

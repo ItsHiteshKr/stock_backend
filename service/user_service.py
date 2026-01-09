@@ -66,6 +66,18 @@ class UserService:
         db.commit()
         return {"message": "User deleted successfully"}
     
+
+    @staticmethod
+    def get_user_data_by_user_email(email: EmailStr, db: Session) -> UserResponse:
+        """Get User data for a specific user ID"""
+
+        db_user = db.query(UserTable).filter(UserTable.email == email).first()
+
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user
+    
+
     @staticmethod
     def delete_user_data_by_email(email: EmailStr, db: Session) -> dict:
         """Delete User data for a specific user ID"""
