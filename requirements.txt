@@ -18,6 +18,7 @@ pandas
 yfinance
 pandas 
 ta
+python-dateutil
 
 
 #  create virtual environment = python -m venv stock_env
