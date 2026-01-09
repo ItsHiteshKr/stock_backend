@@ -14,7 +14,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     full_name: str
-    mobile_number: int
+    mobile_number: Optional[int]
 
     class Config:
         from_attributes = True

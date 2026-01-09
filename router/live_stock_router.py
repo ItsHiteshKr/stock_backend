@@ -7,6 +7,13 @@ from db.database import get_db
 import yfinance as yf
 from datetime import datetime
 
+# Celery tasks import (optional - for manual trigger)
+try:
+    from celery_tasks import fetch_intraday_data, fetch_all_stocks_intraday, fetch_selected_stocks_intraday
+    CELERY_AVAILABLE = True
+except ImportError:
+    CELERY_AVAILABLE = False
+
 router = APIRouter()
 
 @router.get("/stocks/price/{symbol}", response_model=StockPriceResponse)
@@ -55,19 +62,75 @@ def intraday_series(symbol: str, background_tasks: BackgroundTasks):
                 "volume": float(row.get("Volume", 0.0)),
             })
 
-            # DB me save 
-            intraday_record = IntradayData(
-                symbol=sym,
-                timestamp=ts,
-                open=data_dict["open"],
-                high=data_dict["high"],
-                low=data_dict["low"],
-                close=data_dict["close"],
-                volume=data_dict["volume"]
-            )
+            # DB me save in background
 
         background_tasks.add_task(_persist_intraday_batch, sym, rows_to_save)
         return out
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch intraday for {symbol}: {e}")
+
+
+# Celery Tasks ke liye manual trigger endpoints
+
+@router.post("/stocks/celery/fetch-intraday/{symbol}")
+def trigger_celery_intraday(symbol: str):
+    """
+    Manually trigger Celery task to fetch and save intraday data for a symbol
+    """
+    if not CELERY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Celery not available. Run celery worker first.")
+    
+    try:
+        result = fetch_intraday_data.delay(symbol.upper())
+        return {
+            "status": "task_triggered",
+            "symbol": symbol.upper(),
+            "task_id": result.id,
+            "message": "Task queued successfully. Check Celery worker logs for status."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger task: {e}")
+
+
+@router.post("/stocks/celery/fetch-all-intraday")
+def trigger_all_stocks_celery():
+    """
+    Manually trigger Celery task to fetch intraday data for all stocks in database
+    """
+    if not CELERY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Celery not available. Run celery worker first.")
+    
+    try:
+        result = fetch_all_stocks_intraday.delay()
+        return {
+            "status": "task_triggered",
+            "task_id": result.id,
+            "message": "Batch task queued. All stocks will be processed."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger task: {e}")
+
+
+@router.post("/stocks/celery/fetch-selected-intraday")
+def trigger_selected_stocks_celery(symbols: list[str]):
+    """
+    Manually trigger Celery task for selected stocks
+    Body: ["RELIANCE.NS", "TCS.NS", "INFY.NS"]
+    """
+    if not CELERY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Celery not available. Run celery worker first.")
+    
+    if not symbols:
+        raise HTTPException(status_code=400, detail="Symbols list cannot be empty")
+    
+    try:
+        result = fetch_selected_stocks_intraday.delay(symbols)
+        return {
+            "status": "task_triggered",
+            "total_symbols": len(symbols),
+            "task_id": result.id,
+            "message": f"Tasks queued for {len(symbols)} stocks"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger task: {e}")
