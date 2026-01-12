@@ -26,8 +26,8 @@ from router.index_router_for_UI import router as index_router_for_UI
 from router.insights_router import router as insights_router
 from router.gainer_looser_router import router as gainer_looser_router
 from router.user_extraDetails_router import router as user_extraDetails_router
-
-
+from router.trend_router import router as trend_router
+from router.portfolio_recommendation_router import router as portfolio_recommendation_router
 
 logger = logging.getLogger(__name__)
 
@@ -96,9 +96,8 @@ app.include_router(index_router_for_UI, tags=["Search and list Indices"])
 app.include_router(insights_router)
 app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
 app.include_router(user_extraDetails_router, tags=["User Extra Details"])
-
-
-
+app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
+app.include_router(portfolio_recommendation_router, tags=["Portfolio Recommendation"])
 
 
 # Mount admin panel

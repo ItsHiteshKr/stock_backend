@@ -19,6 +19,8 @@ yfinance
 pandas 
 ta
 python-dateutil
+prophet
+
 
 #  create virtual environment = python -m venv stock_env
 #  activate virtual environment = stock_env\Scripts\activate

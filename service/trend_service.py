@@ -115,11 +115,7 @@ def get_trend_history(db: Session, symbol: str, limit: int = 10):
         .limit(limit)\
         .all()
 
-
-# ============================================
 # SUPPORT & RESISTANCE
-# ============================================
-
 def find_support_resistance_levels(df: pd.DataFrame) -> Dict:
     """Identify support and resistance levels"""
     
