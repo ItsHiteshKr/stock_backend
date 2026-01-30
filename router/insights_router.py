@@ -68,6 +68,7 @@ def get_alerts(symbol: str, db: Session = Depends(get_db)):
 
 
 
+
 @router.get("/ai/{symbol}")
 def ai_insight(symbol: str, db: Session = Depends(get_db)):
     insight = ai_generated_insight(db, symbol)
@@ -76,6 +77,6 @@ def ai_insight(symbol: str, db: Session = Depends(get_db)):
         "ai_insight": insight
     }
 
-@router.get("/insights/decision/{symbol}")
+@router.get("/decision/{symbol}")
 def stock_decision(symbol: str, db: Session = Depends(get_db)):
     return buy_sell_hold_decision(db, symbol)
