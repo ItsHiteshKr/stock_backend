@@ -29,6 +29,9 @@ from router.user_extraDetails_router import router as user_extraDetails_router
 from router.portfolio_router import router as portfolio_router
 
 
+from router.trend_router import router as trend_router
+from router.portfolio_recommendation_router import router as portfolio_recommendation_router
+from router.cache_router import router as cache_router
 
 logger = logging.getLogger(__name__)
 
@@ -99,8 +102,9 @@ app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
 app.include_router(user_extraDetails_router, tags=["User Extra Details"])
 app.include_router(portfolio_router, tags=["Portfolio Management"])
 
-
-
+app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
+app.include_router(portfolio_recommendation_router, tags=["Portfolio Recommendation"])
+app.include_router(cache_router, tags=["Cache Management"])
 
 
 # Mount admin panel
