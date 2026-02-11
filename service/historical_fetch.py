@@ -1,43 +1,38 @@
+# service/historical_fetch.py
 import yfinance as yf
 from datetime import datetime, timedelta
 from db.database import SessionLocal
 from model.daily_data import DailyData
 from model.stock import Stock
-from model.index import IndexStock
 
 def store_history():
     db = SessionLocal()
 
-    # Fetch all symbols from stocks table
-    stock_symbols = [s[0] for s in db.query(Stock.symbol).all()]
+    # Fetch all stocks
+    stocks = db.query(Stock).all()
+    print("Total symbols to fetch:", len(stocks))
 
-    # Fetch all unique symbols from indices table
-    index_symbols = [s[0] for s in db.query(IndexStock.stock_symbol).distinct().all()]
+    for stock in stocks:
+        sym = stock.symbol
+        print(f"Fetching history for {sym}...")
 
-    # Combine symbols and remove duplicates
-    symbols = list(set(stock_symbols + index_symbols))
-    print("Total symbols found:", len(symbols))
-
-    for sym in symbols:
-        print(f"\nFetching history for {sym}")
-
-        # Check latest date in DB for this symbol
+        # Get latest date for this stock
         last_record = (
             db.query(DailyData.date)
-            .filter(DailyData.symbol == sym)
+            .filter(DailyData.stock_id == stock.id)
             .order_by(DailyData.date.desc())
             .first()
         )
 
         if last_record:
-            start_date = last_record[0] + timedelta(days=1)  # start from next day
+            start_date = last_record[0] + timedelta(days=1)
         else:
-            start_date = datetime(2010, 1, 1).date()  # default start date
+            start_date = datetime(2010, 1, 1).date()
 
         end_date = datetime.now().date()
 
         if start_date > end_date:
-            print("Already up-to-date.")
+            print(f"{sym} already up-to-date.")
             continue
 
         try:
@@ -47,20 +42,18 @@ def store_history():
             continue
 
         if df.empty:
-            print("No new data available.")
+            print(f"No new data for {sym}")
             continue
 
-        # Ensure columns are correct
         df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
         df.reset_index(inplace=True)
 
-        # Insert new rows
         for _, row in df.iterrows():
             date_value = row["Date"].date()
-            # Skip if already exists
+
             exists = (
                 db.query(DailyData)
-                .filter(DailyData.symbol == sym, DailyData.date == date_value)
+                .filter(DailyData.stock_id == stock.id, DailyData.date == date_value)
                 .first()
             )
             if exists:
@@ -68,24 +61,26 @@ def store_history():
 
             try:
                 record = DailyData(
-                    symbol=sym,
+                    stock_id=stock.id,
+                    symbol=stock.symbol,
                     date=date_value,
                     open=float(row["Open"]),
                     high=float(row["High"]),
                     low=float(row["Low"]),
                     close=float(row["Close"]),
-                    volume=int(row["Volume"]),
+                    adj_close=float(row["Adj Close"]) if "Adj Close" in row else float(row["Close"]),
+                    volume=int(row["Volume"])
                 )
                 db.add(record)
             except Exception as e:
-                print(f"Error inserting row for {sym} on {date_value}: {e}")
+                print(f"Error inserting {sym} on {date_value}: {e}")
                 continue
 
         db.commit()
         print(f"✔ Saved history for {sym}")
 
     db.close()
-    print("\nAll history updated!")
+    print("✅ All historical data updated!")
 
 if __name__ == "__main__":
     store_history()

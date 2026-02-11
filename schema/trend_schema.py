@@ -78,6 +78,7 @@ class CandlestickPatternsResponse(BaseModel):
     status: str
     data: CandlestickPatternsData
 
+
 # DATABASE SCHEMAS
 class TrendAnalysisDB(BaseModel):
     """Schema for saving trend analysis to DB"""
@@ -113,6 +114,7 @@ class SupportResistanceDB(BaseModel):
     
     class Config:
         from_attributes = True
+
 
 class CandlestickPatternDB(BaseModel):
     """Schema for saving candlestick pattern to DB"""

@@ -7,7 +7,10 @@ import numpy as np
 from datetime import datetime
 from fastapi import HTTPException
 
+# ============================================
 # DATA FETCHING
+# ============================================
+
 def get_stock_data(symbol: str, period: str = "3mo") -> pd.DataFrame:
     """
     Fetch stock data from Yahoo Finance
@@ -35,7 +38,11 @@ def get_stock_data(symbol: str, period: str = "3mo") -> pd.DataFrame:
             detail=f"Error fetching data for {symbol}: {str(e)}"
         )
 
+
+# ============================================
 # TREND ANALYSIS
+# ============================================
+
 def calculate_trend(df: pd.DataFrame) -> Dict:
     """Calculate trend analysis"""
     
@@ -77,6 +84,7 @@ def calculate_trend(df: pd.DataFrame) -> Dict:
         "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
+
 def save_trend_analysis(db: Session, symbol: str, trend_data: Dict):
     """Save trend analysis to database"""
     try:
@@ -97,6 +105,7 @@ def save_trend_analysis(db: Session, symbol: str, trend_data: Dict):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 def get_trend_history(db: Session, symbol: str, limit: int = 10):
     """Get historical trend analysis for a symbol"""
@@ -161,6 +170,7 @@ def save_support_resistance(db: Session, symbol: str, levels_data: Dict):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 # CANDLESTICK PATTERNS
 def detect_candlestick_patterns(df: pd.DataFrame) -> Dict:
@@ -249,6 +259,7 @@ def detect_candlestick_patterns(df: pd.DataFrame) -> Dict:
         "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
+
 def save_candlestick_patterns(db: Session, symbol: str, patterns_data: Dict):
     """Save detected patterns to database"""
     try:
@@ -271,6 +282,7 @@ def save_candlestick_patterns(db: Session, symbol: str, patterns_data: Dict):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 def get_pattern_history(db: Session, symbol: str, limit: int = 20):
     """Get historical patterns for a symbol"""

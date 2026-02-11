@@ -28,6 +28,7 @@ router = APIRouter(
 async def get_trend(symbol: str, db: Session = Depends(get_db), save_to_db: bool = True):
     """
      trend detection (uptrend, downtrend, sideways)
+    Basic trend detection (uptrend, downtrend, sideways)
     
     - **symbol**: Stock symbol (e.g., AAPL, RELIANCE.NS)
     - **save_to_db**: Save analysis to database (default: True)
@@ -35,7 +36,6 @@ async def get_trend(symbol: str, db: Session = Depends(get_db), save_to_db: bool
     df = get_stock_data(symbol.upper(), period="3mo")
     trend_data = calculate_trend(df)
     
-    # Save to database if requested
     if save_to_db:
         save_trend_analysis(db, symbol.upper(), trend_data)
     
@@ -44,6 +44,7 @@ async def get_trend(symbol: str, db: Session = Depends(get_db), save_to_db: bool
         "status": "success",
         "data": trend_data
     }
+
 
 @router.get("/{symbol}/history")
 async def get_trend_analysis_history(symbol: str, limit: int = 10, db: Session = Depends(get_db)):
@@ -58,7 +59,18 @@ async def get_trend_analysis_history(symbol: str, limit: int = 10, db: Session =
         "symbol": symbol.upper(),
         "status": "success",
         "total_records": len(history),
-        "data": history
+        "data": [
+            {
+                "id": h.id,
+                "trend": h.trend,
+                "signal": h.signal,
+                "strength": h.strength,
+                "current_price": h.current_price,
+                "sma_20": h.sma_20,
+                "sma_50": h.sma_50,
+                "created_at": h.created_at.strftime("%Y-%m-%d %H:%M:%S") if h.created_at else None
+            } for h in history
+        ]
     }
 
 
@@ -73,7 +85,6 @@ async def get_support_resistance(symbol: str, db: Session = Depends(get_db), sav
     df = get_stock_data(symbol.upper(), period="6mo")
     levels_data = find_support_resistance_levels(df)
     
-    # Save to database if requested
     if save_to_db:
         save_support_resistance(db, symbol.upper(), levels_data)
     
@@ -95,7 +106,6 @@ async def get_candlestick_patterns(symbol: str, db: Session = Depends(get_db), s
     df = get_stock_data(symbol.upper(), period="1mo")
     patterns_data = detect_candlestick_patterns(df)
     
-    # Save to database if requested
     if save_to_db:
         save_candlestick_patterns(db, symbol.upper(), patterns_data)
     
@@ -119,5 +129,16 @@ async def get_candlestick_pattern_history(symbol: str, limit: int = 20, db: Sess
         "symbol": symbol.upper(),
         "status": "success",
         "total_patterns": len(history),
-        "data": history
+        "data": [
+            {
+                "id": h.id,
+                "pattern": h.pattern,
+                "pattern_type": h.pattern_type,
+                "confidence": h.confidence,
+                "description": h.description,
+                "pattern_date": h.pattern_date,
+                "price": h.price,
+                "detected_at": h.detected_at.strftime("%Y-%m-%d %H:%M:%S") if h.detected_at else None
+            } for h in history
+        ]
     }
