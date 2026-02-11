@@ -27,6 +27,7 @@ router = APIRouter(
 @router.get("/{symbol}", response_model=TrendAnalysisResponse)
 async def get_trend(symbol: str, db: Session = Depends(get_db), save_to_db: bool = True):
     """
+     trend detection (uptrend, downtrend, sideways)
     Basic trend detection (uptrend, downtrend, sideways)
     
     - **symbol**: Stock symbol (e.g., AAPL, RELIANCE.NS)
