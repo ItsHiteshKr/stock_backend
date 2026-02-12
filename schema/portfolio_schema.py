@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, EmailStr, computed_field
 from typing import List, Optional
 from datetime import datetime
 
@@ -11,31 +11,25 @@ class HoldingItem(BaseModel):
     quantity: int
     avg_buy_price: float
     sector: Optional[str] = None
-    notes: Optional[str] = None
 
 
 class HoldingUpdate(BaseModel):
     """Schema for updating an existing holding"""
     quantity: Optional[int] = None
     avg_buy_price: Optional[float] = None
-    stock_name: Optional[str] = None
-    sector: Optional[str] = None
-    notes: Optional[str] = None
 
 
 # ============ PORTFOLIO SCHEMAS ============
 class PortfolioCreate(BaseModel):
     """Create portfolio with multiple stocks at once"""
-    user_id: int
+    user_email: EmailStr
     portfolio_name: str
-    description: Optional[str] = None
     holdings: List[HoldingItem]  # Multiple stocks
 
 
 class PortfolioUpdate(BaseModel):
     """Update portfolio metadata"""
     portfolio_name: Optional[str] = None
-    description: Optional[str] = None
 
 
 class AddHoldingToPortfolio(BaseModel):
@@ -45,7 +39,6 @@ class AddHoldingToPortfolio(BaseModel):
     quantity: int
     avg_buy_price: float
     sector: Optional[str] = None
-    notes: Optional[str] = None
 
 
 # ============ RESPONSE SCHEMAS ============
@@ -59,7 +52,6 @@ class HoldingResponse(BaseModel):
     avg_buy_price: float
     total_invested: float
     sector: Optional[str]
-    notes: Optional[str]
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -71,7 +63,6 @@ class PortfolioListResponse(BaseModel):
     """Response for listing user's portfolios"""
     id: int
     portfolio_name: str
-    description: Optional[str]
     total_holdings: int
     total_invested: float
     created_at: datetime
@@ -83,9 +74,8 @@ class PortfolioListResponse(BaseModel):
 class PortfolioDetailResponse(BaseModel):
     """Detailed portfolio response with all holdings"""
     id: int
-    user_id: int
+    user_email: EmailStr
     portfolio_name: str
-    description: Optional[str]
     holdings: List[HoldingResponse]
     created_at: datetime
     updated_at: Optional[datetime]

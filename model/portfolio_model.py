@@ -9,9 +9,8 @@ class Portfolio(Base):
     __tablename__ = "portfolios"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    user_email = Column(String(100), ForeignKey("users.email", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     portfolio_name = Column(String(50), nullable=False)
-    description = Column(String(200), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
@@ -20,7 +19,7 @@ class Portfolio(Base):
 
     # Unique constraint: one portfolio name per user
     __table_args__ = (
-        UniqueConstraint('user_id', 'portfolio_name', name='uq_user_portfolio'),
+        UniqueConstraint('user_email', 'portfolio_name', name='uq_user_portfolio'),
         {'mysql_engine': 'InnoDB'}
     )
 
@@ -37,7 +36,6 @@ class PortfolioHolding(Base):
     avg_buy_price = Column(Float, nullable=False, default=0.0)
     total_invested = Column(Float, nullable=False, default=0.0)
     sector = Column(String(50), nullable=True)
-    notes = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
