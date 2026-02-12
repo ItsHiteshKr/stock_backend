@@ -23,6 +23,7 @@ from router.indicators_router import router as indicators_router
 from router.comparison_routes import router as comparison_routes
 from router.stocks_router_for_UI import router as stocks_router_for_UI
 from router.index_router_for_UI import router as index_router_for_UI
+from router.trend_router import router as trend_router
 from router.insights_router import router as insights_router
 from router.gainer_looser_router import router as gainer_looser_router
 from router.user_extraDetails_router import router as user_extraDetails_router
@@ -65,9 +66,9 @@ app = FastAPI(
     title="Nifty Stock API",
     description="API for managing Nifty stock data",
     version="1.0.0",
-    docs_url="/docs" if ENABLE_DOCS else None,       # disable Swagger UI
-    redoc_url="/redoc" if ENABLE_DOCS else None,      # disable ReDoc UI
-    openapi_url="/openapi.json" if ENABLE_DOCS else None,     # hide API schema as well (more secure)
+    docs_url="/docs", #if ENABLE_DOCS else None,       # disable Swagger UI
+    redoc_url="/redoc", #if ENABLE_DOCS else None,      # disable ReDoc UI
+    openapi_url="/openapi.json", #if ENABLE_DOCS else None,     # hide API schema as well (more secure)
 )
 
 # Create all tables on startup
@@ -97,6 +98,7 @@ app.include_router(indicators_router,tags=["Technical Indicators"])
 app.include_router(comparison_routes,tags=["Stock Comparison"])
 app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
+app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
 app.include_router(insights_router)
 app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
 app.include_router(user_extraDetails_router, tags=["User Extra Details"])
