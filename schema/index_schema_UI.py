@@ -4,7 +4,7 @@ class IndexBase(BaseModel):
     stock_symbol: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class IndexListResponse(BaseModel):
