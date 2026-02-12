@@ -33,6 +33,7 @@ from router.portfolio_router import router as portfolio_router
 from router.trend_router import router as trend_router
 from router.portfolio_recommendation_router import router as portfolio_recommendation_router
 from router.cache_router import router as cache_router
+from router.pattern_matcher_router import router as pattern_matcher_router
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +106,7 @@ app.include_router(user_extraDetails_router, tags=["User Extra Details"])
 app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
 app.include_router(portfolio_recommendation_router, tags=["Portfolio Recommendation"])
 app.include_router(cache_router, tags=["Cache Management"])
+app.include_router(pattern_matcher_router)  # Tag already defined in router file
 app.include_router(portfolio_router, tags=["Portfolio Management"])
 
 
