@@ -5,7 +5,7 @@ from sqlalchemy import func, desc
 from db.database import get_db
 from model.stock import Stock
 from model.daily_data import DailyData
-from schema.stock_schema_UI import StockBase, PopularStockResponse
+from schema.stock_schema_UI import StockBase, PopularStockResponse, StockBaseWithSector
 
 router = APIRouter(prefix="/stocks")
 
@@ -32,7 +32,17 @@ def search_stocks(q: str, db: Session = Depends(get_db)):
 
     return result
 
+# -----------------------------------------
+# 2️⃣ SEARCH STOCKS (symbol, name and their sector)
+@router.get("/search_with_sector", response_model=list[StockBaseWithSector])
+def search_stocks(q: str, db: Session = Depends(get_db)):
+    result = db.query(Stock).filter(
+        (Stock.symbol.like(f"%{q}%")) |
+        (Stock.name.like(f"%{q}%")) |
+        (Stock.sector.like(f"%{q}%"))
+    ).all()
 
+    return result
 # -----------------------------------------
 # 3️⃣ POPULAR STOCKS (based on high traded volume)
 # -----------------------------------------
