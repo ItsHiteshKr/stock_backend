@@ -5,8 +5,16 @@ class StockBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+
+class StockBaseWithSector(BaseModel):
+    symbol: str
+    name: str
+    sector: str
+
+    class Config:
+        orm_mode = True
 
 class PopularStockResponse(BaseModel):
     symbol: str

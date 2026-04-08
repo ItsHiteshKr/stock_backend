@@ -7,6 +7,7 @@ class Stock(Base):
     id = Column(Integer, primary_key=True, index=True)
     symbol = Column(String(20), unique=True, index=True)
     name = Column(String(100))
+    sector = Column(String(50))
 
 
     exchange = Column(String(10), default="NSE")

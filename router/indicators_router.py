@@ -18,7 +18,7 @@ router = APIRouter()
 # ---------------------------------------------
 @router.get("/sma/{symbol}")
 def get_sma(symbol: str, period: int = 20, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol)
+    df = get_price_dataframe(db, symbol, limit=0)
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_sma(df, period).to_dict(orient="records")
@@ -29,7 +29,7 @@ def get_sma(symbol: str, period: int = 20, db: Session = Depends(get_db)):
 # ---------------------------------------------
 @router.get("/ema/{symbol}")
 def get_ema(symbol: str, period: int = 20, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol)
+    df = get_price_dataframe(db, symbol, limit=0)
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_ema(df, period).to_dict(orient="records")
@@ -40,7 +40,7 @@ def get_ema(symbol: str, period: int = 20, db: Session = Depends(get_db)):
 # ---------------------------------------------
 @router.get("/rsi/{symbol}")
 def get_rsi(symbol: str, period: int = 14, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol)
+    df = get_price_dataframe(db, symbol, limit=0)
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_rsi(df, period).to_dict(orient="records")
@@ -51,7 +51,7 @@ def get_rsi(symbol: str, period: int = 14, db: Session = Depends(get_db)):
 # ---------------------------------------------
 @router.get("/macd/{symbol}")
 def get_macd(symbol: str, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol)  # MACD needs more data
+    df = get_price_dataframe(db, symbol, limit=0)  # MACD needs more data
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_macd(df).to_dict(orient="records")
@@ -66,7 +66,7 @@ def get_bollinger(
     period: int = 20,   # IMPORTANT
     db: Session = Depends(get_db)
 ):
-    df = get_price_dataframe(db, symbol)
+    df = get_price_dataframe(db, symbol, limit=0)
     if df is None or df.empty:
         return []
 
@@ -87,7 +87,7 @@ def get_bollinger(
 # ---------------------------------------------
 @router.get("/all/{symbol}")
 def get_all_indicators(symbol: str, db: Session = Depends(get_db)):
-    df = get_price_dataframe(db, symbol, limit=300)
+    df = get_price_dataframe(db, symbol, limit=0)
     if df is None:
         raise HTTPException(404, "No data found")
     return calculate_all_indicators(df)

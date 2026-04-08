@@ -18,6 +18,9 @@ pandas
 yfinance
 pandas 
 ta
+celery
+celery[redis]
+flower
 python-dateutil
 prophet
 

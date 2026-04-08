@@ -23,13 +23,17 @@ from router.indicators_router import router as indicators_router
 from router.comparison_routes import router as comparison_routes
 from router.stocks_router_for_UI import router as stocks_router_for_UI
 from router.index_router_for_UI import router as index_router_for_UI
+from router.trend_router import router as trend_router
 from router.insights_router import router as insights_router
 from router.gainer_looser_router import router as gainer_looser_router
 from router.user_extraDetails_router import router as user_extraDetails_router
+from router.portfolio_router import router as portfolio_router
 from router.trend_router import router as trend_router
 from router.portfolio_recommendation_router import router as portfolio_recommendation_router
 from router.pattern_router import router as pattern_router
 from router.candle_ai import router as candle_router
+from router.cache_router import router as cache_router
+from router.pattern_matcher_router import router as pattern_matcher_router
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +99,7 @@ app.include_router(indicators_router,tags=["Technical Indicators"])
 app.include_router(comparison_routes,tags=["Stock Comparison"])
 app.include_router(stocks_router_for_UI, tags=["Search and list Stocks"])
 app.include_router(index_router_for_UI, tags=["Search and list Indices"])
+app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
 app.include_router(insights_router)
 app.include_router(gainer_looser_router, tags=["Top Gainers and losers"])
 app.include_router(user_extraDetails_router, tags=["User Extra Details"])
@@ -102,6 +107,10 @@ app.include_router(trend_router, tags=["Trend & Pattern Analysis"])
 app.include_router(portfolio_recommendation_router, tags=["Portfolio Recommendation"])
 app.include_router(pattern_router)
 app.include_router(candle_router)
+app.include_router(cache_router, tags=["Cache Management"])
+app.include_router(pattern_matcher_router) 
+app.include_router(portfolio_router, tags=["Portfolio Management"])
+
 
 
 # Mount admin panel

@@ -151,13 +151,16 @@ def get_price_dataframe(db: Session, symbol: str, limit: int = 200):
     Fetch latest 'limit' candles for the symbol.
     Oldest first (required for indicators).
     """
-    rows = (
+    query = (
         db.query(DailyData)
         .filter(DailyData.symbol == symbol)
         .order_by(DailyData.date.desc())
-        .limit(limit)
-        .all()
     )
+
+    if limit and limit > 0:
+        query = query.limit(limit)
+
+    rows = query.all()
 
     if not rows:
         return None
@@ -200,8 +203,10 @@ def calculate_rsi(df: pd.DataFrame, period: int = 14):
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
 
-    avg_gain = gain.rolling(period).mean()
-    avg_loss = loss.rolling(period).mean()
+    # Use Wilder's Smoothing (matches TradingView Standard)
+    # alpha = 1/period is equivalent to the smoothing factor used in RSI
+    avg_gain = gain.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
 
     rs = avg_gain / avg_loss
     df["RSI"] = 100 - (100 / (1 + rs))
