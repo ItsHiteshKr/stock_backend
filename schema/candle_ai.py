@@ -1,29 +1,68 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import datetime
 
+
+# Notification schemas
+
+class NotificationOut(BaseModel):
+    """
+    One alert notification — returned by GET /api/candle/notifications.
+    Frontend uses this to show popup/banner to user.
+    """
+    id:          str
+    symbol:      str
+    interval:    str
+    time:        str
+    pattern:     str
+    direction:   str
+    confidence:  int
+    signal:      str
+    trend:       str
+    support:     Optional[float]
+    resistance:  Optional[float]
+    candle_open:   float
+    candle_high:   float
+    candle_low:    float
+    candle_close:  float
+    created_at:  datetime
+    is_read:     bool
+
+
+class MarkReadRequest(BaseModel):
+    """POST /api/candle/notifications/mark-read"""
+    ids: List[str] = Field(...,
+        example=["RELIANCE.NS:5m:10:15"],
+        description="List of notification IDs to mark as read")
+
+
+class NotificationsResponse(BaseModel):
+    """Response for GET /api/candle/notifications"""
+    total:         int
+    unread_count:  int
+    notifications: List[NotificationOut]
+
+
+# Monitor schemas 
 
 class StartMonitorRequest(BaseModel):
     """
     POST /api/candle/start
 
-    symbols        — list of stock names to monitor
-    email_receivers — list of emails to send alerts to (user provides their own)
+    symbols         — stock names to monitor
+    email_receivers — optional, send email alerts to these addresses too
+                      leave empty [] if you only want API notifications
     """
-    symbols:         List[str]  = Field(..., example=["RELIANCE", "TCS"])
-    email_receivers: List[str]  = Field(
-        ...,
-        example=["user@gmail.com", "trader@company.com"],
-        description="Alerts sent to these emails when confidence > 80%"
+    symbols:         List[str] = Field(..., example=["RELIANCE", "TCS"])
+    email_receivers: List[str] = Field(
+        default=[],
+        example=["user@gmail.com"],
+        description="Optional. Leave empty to use API notifications only."
     )
 
 
 class StopMonitorRequest(BaseModel):
-    """
-    POST /api/candle/stop
-    symbol   — which stock to stop
-    interval — optional, if empty stops all intervals for that stock
-    """
-    symbol: str  = Field(..., example="RELIANCE.NS")
+    symbol:   str           = Field(..., example="RELIANCE.NS")
     interval: Optional[str] = Field(None, example="5m")
 
 
@@ -54,7 +93,7 @@ class StopMonitorResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     total_monitors: int
-    monitors: List[MonitorStatusItem]
+    monitors:       List[MonitorStatusItem]
 
 
 class SymbolsResponse(BaseModel):
