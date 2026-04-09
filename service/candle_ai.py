@@ -1,4 +1,5 @@
 import os
+import uuid
 import yfinance as yf
 import time
 import smtplib
@@ -12,19 +13,15 @@ try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
-    pass  
+    pass
 
-from model.candle_ai import MonitorSession
+from model.candle_ai import MonitorSession, Notification
 
 
-# ── Settings (sensitive values from .env) 
-# Create a .env file in your project root with these lines:
-#   EMAIL_SENDER=youremail@gmail.com
-#   EMAIL_PASSWORD=your_app_password
-#   EMAIL_MIN_CONF=80
+#  Settings 
 
 EMAIL_SENDER   = os.getenv("EMAIL_SENDER",   "imabhaytiwari1@gmail.com")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD",  "")        # loaded from .env
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD",  "")
 EMAIL_ENABLED  = os.getenv("EMAIL_ENABLED",  "true").lower() == "true"
 EMAIL_MIN_CONF = int(os.getenv("EMAIL_MIN_CONF", "80"))
 
@@ -108,11 +105,70 @@ BIAS = {
 }
 
 
-# Helpers 
+#  In-memory notification store 
+# Stores all alerts where confidence > 80%.
+# Frontend reads these via GET /api/candle/notifications.
+# Max 500 notifications kept to avoid memory growing forever.
+
+_notifications: List[Notification] = []
+_notif_lock    = threading.Lock()
+MAX_NOTIFICATIONS = 500
+
+
+def _store_notification(candle, pattern, direction, confidence,
+                        trend, support, resistance, symbol, interval):
+    """Store one notification in memory."""
+    notif = Notification(
+        id=f"{symbol}:{interval}:{candle['time']}:{uuid.uuid4().hex[:6]}",
+        symbol=symbol,
+        interval=interval,
+        time=candle["time"],
+        pattern=pattern,
+        direction=direction,
+        confidence=confidence,
+        signal=("BUY Signal"  if direction=="BULLISH" else
+                "SELL Signal" if direction=="BEARISH" else "WAIT"),
+        trend=trend,
+        support=support,
+        resistance=resistance,
+        candle_open=round(candle["open"],  2),
+        candle_high=round(candle["high"],  2),
+        candle_low=round(candle["low"],    2),
+        candle_close=round(candle["close"],2),
+    )
+    with _notif_lock:
+        _notifications.append(notif)
+        # Keep only the latest MAX_NOTIFICATIONS
+        if len(_notifications) > MAX_NOTIFICATIONS:
+            del _notifications[:-MAX_NOTIFICATIONS]
+
+
+def get_notifications(unread_only: bool = False) -> List[Notification]:
+    with _notif_lock:
+        if unread_only:
+            return [n for n in _notifications if not n.is_read]
+        return list(_notifications)
+
+
+def mark_notifications_read(ids: List[str]):
+    with _notif_lock:
+        id_set = set(ids)
+        for n in _notifications:
+            if n.id in id_set:
+                n.is_read = True
+
+
+def clear_notifications():
+    with _notif_lock:
+        _notifications.clear()
+
+
+# Helpers (unchanged from candle_ai.py) 
 
 def fix_symbol(raw: str) -> str:
     s = raw.strip().upper()
     return SYMBOL_MAP.get(s, s)
+
 
 def is_market_open(symbol: str):
     now_utc = datetime.now(timezone.utc)
@@ -138,11 +194,13 @@ def is_market_open(symbol: str):
     else:
         return False, f"{label} CLOSED for today"
 
+
 def _secs_to_next_candle(interval: str) -> int:
     mins = INTERVAL_MIN.get(interval, 5)
     now  = datetime.now()
     secs_left = (mins*60) - ((now.minute*60 + now.second) % (mins*60))
     return max(5, secs_left + 5)
+
 
 def metrics(o, h, l, c):
     rng=h-l; body=abs(c-o); bull=c>=o
@@ -347,12 +405,12 @@ def build_verdict(pattern,today_candles,v):
     return direction,confidence,rule,basis,up,down,flat,samples,v_label,v_ratio
 
 
-#  Email (receivers passed per user — not hardcoded) 
+# Email
 
 def send_alert(candle,pattern,direction,confidence,rule,
                trend,support,resistance,v_label,v_ratio,
                symbol,interval,up,down,samples,
-               email_receivers: List[str]):          # ← per-user list
+               email_receivers:List[str]):
     if not EMAIL_ENABLED or not email_receivers: return
     if confidence<=EMAIL_MIN_CONF: return
     if direction=="BULLISH": move,signal="PRICE WILL GO UP","BUY Signal"
@@ -369,25 +427,13 @@ CANDLE AI — Pattern Alert
 
   Symbol     :  {symbol}  [{interval}]
   Time       :  {candle['time']}  ({'BULLISH' if bull else 'BEARISH'} candle)
-
-  Open       :  {round(candle['open'],2)}
-  High       :  {round(candle['high'],2)}
-  Low        :  {round(candle['low'],2)}
-  Close      :  {round(candle['close'],2)}
-  Volume     :  {int(candle['volume'])}
+  Open: {round(candle['open'],2)}  High: {round(candle['high'],2)}  Low: {round(candle['low'],2)}  Close: {round(candle['close'],2)}
 
   Pattern    :  {pattern}
-  Rule       :  {rule}
-  Samples    :  {samples} — {up}U / {down}D
-
-  Trend      :  {trend}
-  Volume Sig :  {v_label}  ({v_ratio}x avg)
-  Support    :  {support}
-  Resistance :  {resistance}
-
-  Next Candle:  {move}
   Signal     :  {signal}
   Confidence :  {confidence}%  —  {cw}
+  Trend      :  {trend}
+  Support    :  {support}   Resistance: {resistance}
 """
     msg=MIMEMultipart()
     msg["From"]=EMAIL_SENDER; msg["To"]=", ".join(email_receivers); msg["Subject"]=subject
@@ -420,7 +466,7 @@ def fetch_candles(symbol,interval):
     return None
 
 
-#  Session registry 
+# Session registry 
 
 _sessions: Dict[str,MonitorSession] = {}
 _lock = threading.Lock()
@@ -440,7 +486,7 @@ def _run_monitor(state: MonitorSession):
         state.stop_event.wait(timeout=_secs_to_next_candle(interval))
 
 
-def _process(df,state: MonitorSession):
+def _process(df,state:MonitorSession):
     symbol=state.symbol; interval=state.interval
     closed=df.iloc[:-1]
     show_last_one=None
@@ -474,19 +520,26 @@ def _process(df,state: MonitorSession):
         state.last_direction=direction; state.last_candle_time=t
         state.last_signal=("BUY Signal" if direction=="BULLISH" else
                            "SELL Signal" if direction=="BEARISH" else "WAIT")
-        if conf>EMAIL_MIN_CONF and direction!="NEUTRAL" and state.email_receivers:
-            threading.Thread(
-                target=send_alert,
-                args=(candle,pattern,direction,conf,rule,trend,support,resist,
-                      v_lbl,v_ratio,symbol,interval,up,down,samples,
-                      state.email_receivers),   # ← user's own email list
-                daemon=True
-            ).start()
+
+        # ── When confidence > 80%: store notification + optional email ──
+        if conf > EMAIL_MIN_CONF and direction != "NEUTRAL":
+            # Always store in-memory notification (frontend reads this)
+            _store_notification(candle, pattern, direction, conf,
+                                trend, support, resist, symbol, interval)
+            # Send email only if user provided email addresses
+            if state.email_receivers:
+                threading.Thread(
+                    target=send_alert,
+                    args=(candle,pattern,direction,conf,rule,trend,support,resist,
+                          v_lbl,v_ratio,symbol,interval,up,down,samples,
+                          state.email_receivers),
+                    daemon=True
+                ).start()
 
 
 # Public functions called by router 
 
-def start_monitoring(raw_symbols: List[str], email_receivers: List[str]) -> List[str]:
+def start_monitoring(raw_symbols:List[str], email_receivers:List[str]) -> List[str]:
     started=[]
     for raw in raw_symbols:
         symbol=fix_symbol(raw)
@@ -494,11 +547,8 @@ def start_monitoring(raw_symbols: List[str], email_receivers: List[str]) -> List
             key=f"{symbol}:{interval}"
             with _lock:
                 if key in _sessions: continue
-                state=MonitorSession(
-                    symbol=symbol,
-                    interval=interval,
-                    email_receivers=email_receivers   # ← stored per session
-                )
+                state=MonitorSession(symbol=symbol,interval=interval,
+                                     email_receivers=email_receivers)
                 _sessions[key]=state
             threading.Thread(target=_run_monitor,args=(state,),
                              daemon=True,name=f"monitor-{key}").start()
@@ -506,7 +556,7 @@ def start_monitoring(raw_symbols: List[str], email_receivers: List[str]) -> List
     return started
 
 
-def stop_monitoring(symbol: str, interval: Optional[str]=None) -> List[str]:
+def stop_monitoring(symbol:str, interval:Optional[str]=None) -> List[str]:
     stopped=[]
     with _lock:
         keys=[k for k in list(_sessions.keys())
@@ -523,13 +573,10 @@ def get_status() -> List[dict]:
             is_open,_=is_market_open(state.symbol)
             result.append({
                 "symbol":state.symbol,"interval":state.interval,
-                "candles_today":len(state.today_candles),
-                "is_market_open":is_open,
+                "candles_today":len(state.today_candles),"is_market_open":is_open,
                 "email_receivers":state.email_receivers,
                 "last_candle_time":state.last_candle_time,
-                "last_pattern":state.last_pattern,
-                "last_confidence":state.last_confidence,
-                "last_direction":state.last_direction,
-                "last_signal":state.last_signal,
+                "last_pattern":state.last_pattern,"last_confidence":state.last_confidence,
+                "last_direction":state.last_direction,"last_signal":state.last_signal,
             })
     return result
