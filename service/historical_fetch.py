@@ -3,7 +3,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 from db.database import SessionLocal
 from model.daily_data import DailyData
-from model.stock import Stock
+from model.stock_model_UI import Stock
 
 def store_history():
     db = SessionLocal()

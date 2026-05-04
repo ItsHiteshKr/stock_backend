@@ -3,7 +3,7 @@ import yfinance as yf
 from sqlalchemy.exc import IntegrityError
 from db.database import SessionLocal
 from model.daily_data import DailyData
-from model.stock import Stock
+from model.stock_model_UI import Stock
 from datetime import date
 import logging
 
