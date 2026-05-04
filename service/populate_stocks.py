@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from model.stock import Stock
+from model.stock_model_UI import Stock
 from model.index import Index, IndexStock
 
 # -------------------------------

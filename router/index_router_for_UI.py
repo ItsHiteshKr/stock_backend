@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from db.database import get_db
 from model.index import IndexStock, Index
-from model.stock import Stock
+from model.stock_model_UI import Stock
 
 from schema.index_schema_UI import IndexBase
 from datetime import datetime, timedelta

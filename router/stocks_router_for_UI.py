@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc
 from db.database import get_db
-from model.stock import Stock
+from model.stock_model_UI import Stock
 from model.daily_data import DailyData
 from schema.stock_schema_UI import StockBase, PopularStockResponse, StockBaseWithSector
 
